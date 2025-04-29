@@ -7,7 +7,7 @@ load_dotenv()
 
 def get_llm_chain(vectorstore):
     llm = ChatGroq(
-        groq_api_key = st.secrets["groq"]["GROQ_API_KEY"]
+         groq_api_key = st.secrets["groq"]["GROQ_API_KEY"]
 
         model_name="llama3-8b-8192"
     )
