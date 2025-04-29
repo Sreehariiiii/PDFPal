@@ -8,5 +8,5 @@ faiss-cpu
 transformers
 huggingface_hub
 protobuf==3.20.3
+numpy==1.21.6
 torch==2.2.2
-numpy==1.23.0
