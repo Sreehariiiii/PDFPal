@@ -1,14 +1,11 @@
-import os
+import streamlit as st
 from langchain_groq import ChatGroq
 from langchain.chains import RetrievalQA
-from dotenv import load_dotenv
-
-load_dotenv()
 
 def get_llm_chain(vectorstore):
+    groq_api_key = st.secrets["groq"]["GROQ_API_KEY"],
     llm = ChatGroq(
-         groq_api_key = st.secrets["groq"]["GROQ_API_KEY"]
-
+        groq_api_key=groq_api_key,
         model_name="llama3-8b-8192"
     )
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
