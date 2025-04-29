@@ -1,3 +1,4 @@
+from modules.pdf_handler import save_uploaded_files  # Import the function
 from langchain.vectorstores import Chroma
 from langchain.document_loaders import PyPDFLoader
 from langchain.embeddings import HuggingFaceEmbeddings
@@ -8,6 +9,7 @@ import os
 PERSIST_DIR = "./chroma_store"
 
 def load_vectorstore(uploaded_files):
+    # Use the imported save_uploaded_files function
     paths = save_uploaded_files(uploaded_files)
 
     docs = []
