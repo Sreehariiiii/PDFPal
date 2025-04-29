@@ -55,16 +55,15 @@ st.markdown(
 # Use this for your custom title
 st.markdown('<div class="custom-bubble"><h1>How can I help you</h1></div>', unsafe_allow_html=True)
 
-
 # Step 1: Upload PDFs + wait for submit
 uploaded_files, submitted = upload_pdfs()
 
 # Step 2: If user clicks submit, update vectorstore
 if submitted and uploaded_files:
     with st.spinner(" Updating vector database..."):
-        vectorstore = load_vectorstore(uploaded_files)
+        # Ensure the load_vectorstore function is updated for FAISS
+        vectorstore = load_vectorstore(uploaded_files)  # Ensure this is set up for FAISS
         st.session_state.vectorstore = vectorstore
-
 
 # Step 3: Display vectorstore inspector (Sidebar)
 if "vectorstore" in st.session_state:
