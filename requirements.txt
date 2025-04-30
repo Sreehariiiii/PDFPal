@@ -1,6 +1,6 @@
 setuptools==68.2.2
 wheel
-numpy
+numpy==1.19.2
 streamlit
 langchain_groq 
 langchain_community 
