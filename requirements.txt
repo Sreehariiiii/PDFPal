@@ -8,7 +8,7 @@ pypdf==3.16.4
 sentence-transformers==2.5.1
 python-dotenv==1.0.1
 langchain
-
+faiss-cpu
 transformers==4.38.2
 huggingface_hub==0.21.3
 protobuf==4.25.3
