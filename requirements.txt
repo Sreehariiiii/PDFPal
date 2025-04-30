@@ -1,10 +1,10 @@
 setuptools==68.2.2
 wheel
-numpy==1.19.2
+numpy
 streamlit
-langchain_groq
-langchain_community
-pypdf
+langchain_groq 
+langchain_community 
+pypdf 
 sentence_transformers
 python-dotenv
 faiss-cpu
