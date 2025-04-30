@@ -1,7 +1,7 @@
 setuptools==68.2.2
 wheel
-numpy==1.19.2
-streamlit
+numpy==1.24.3
+streamlit==1.22.0
 langchain_groq 
 langchain_community 
 pypdf 
