@@ -1,4 +1,5 @@
 import os
+import pickle
 from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -35,7 +36,8 @@ def load_vectorstore(uploaded_files):
 
     if os.path.exists(PERSIST_DIR) and os.listdir(PERSIST_DIR):
         # Append to existing FAISS
-        vectorstore = FAISS.load_local(PERSIST_DIR, embeddings)
+        with open(PERSIST_DIR + "/faiss_index.pkl", 'rb') as f:
+            vectorstore = pickle.load(f, allow_dangerous_deserialization=True)  # Add the deserialization flag here
         vectorstore.add_documents(texts)
         vectorstore.save_local(PERSIST_DIR)
     else:
