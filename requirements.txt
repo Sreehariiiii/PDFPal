@@ -1,14 +1,14 @@
 setuptools==68.2.2
 wheel
-numpy
-streamlit
-langchain_groq 
-langchain_community 
-pypdf 
-sentence_transformers
+numpy==1.24.4
+torch==2.2.2
+protobuf==3.20.3
+
+streamlit==1.32.2
+sentence_transformers==2.2.2
+transformers==4.37.2
+huggingface_hub==0.20.3
+langchain_community  # if from PyPI, otherwise specify GitHub link
+pypdf
 python-dotenv
 faiss-cpu
-transformers
-huggingface_hub
-protobuf==3.20.3
-torch==2.2.2
