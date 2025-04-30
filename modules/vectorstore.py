@@ -35,11 +35,20 @@ def load_vectorstore(uploaded_files):
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L12-v2")
 
     if os.path.exists(PERSIST_DIR) and os.listdir(PERSIST_DIR):
-        # Append to existing FAISS
-        with open(PERSIST_DIR + "/faiss_index.pkl", 'rb') as f:
-            vectorstore = pickle.load(f, allow_dangerous_deserialization=True)  # Add the deserialization flag here
-        vectorstore.add_documents(texts)
-        vectorstore.save_local(PERSIST_DIR)
+        pickle_path = os.path.join(PERSIST_DIR, "faiss_index.pkl")
+        if os.path.exists(pickle_path):
+            # Load FAISS from pickle file with deserialization flag
+            with open(pickle_path, 'rb') as f:
+                vectorstore = pickle.load(f, allow_dangerous_deserialization=True)
+            vectorstore.add_documents(texts)
+            vectorstore.save_local(PERSIST_DIR)
+        else:
+            # If the file doesn't exist, create a new FAISS vector store
+            vectorstore = FAISS.from_documents(
+                documents=texts,
+                embedding=embeddings
+            )
+            vectorstore.save_local(PERSIST_DIR)
     else:
         # Create new FAISS vector store
         vectorstore = FAISS.from_documents(
