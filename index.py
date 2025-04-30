@@ -1,6 +1,6 @@
-import gradio as gr
 import warnings
 import logging
+import streamlit as st
 
 # Local modules
 from modules.chat import display_chat_history, handle_user_input, download_chat_history
@@ -13,65 +13,70 @@ from modules.chroma_inspector import inspect_chroma
 warnings.filterwarnings("ignore")
 logging.getLogger("transformers").setLevel(logging.ERROR)
 
-# App state
-chat_history = []
-vectorstore = None
+st.set_page_config(
+    page_title="RagBot!",     
+)
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-image: url("https://t3.ftcdn.net/jpg/05/77/43/10/360_F_577431075_kUXMnnnKgCcvvPVmn66g4yP7mWnsVJRs.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
 
-def process_pdfs(files):
-    global vectorstore
-    if files:
-        vectorstore = load_vectorstore(files)
-        return "PDFs processed and vectorstore updated."
-    return "No files uploaded."
+    .custom-bubble {
+        background-color: rgba(0, 0, 0, 0.75);
+        padding: 1rem 1.5rem;
+        border-radius: 20px;
+        margin: 3rem 0 1rem 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: fit-content;
+        height: 60px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+    }
 
-def chatbot_fn(message, history):
-    if vectorstore:
-        chain = get_llm_chain(vectorstore)
-        response = handle_user_input(chain, message, history)
-        return response
-    else:
-        return "Please upload and process PDFs first."
+    .custom-bubble h1 {
+        color: white;
+        font-size: 1.4rem;
+        margin: 0;
+        text-align: center;
+        white-space: nowrap;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-def download_history():
-    return download_chat_history(chat_history)
+# Add this for the title bubble:
+st.markdown('<div class="custom-bubble"><h1>How can I help you</h1></div>', unsafe_allow_html=True)
 
-# Custom CSS for background and chat bubble
-custom_css = """
-body {
-    background-image: url('https://t3.ftcdn.net/jpg/05/77/43/10/360_F_577431075_kUXMnnnKgCcvvPVmn66g4yP7mWnsVJRs.jpg');
-    background-size: cover;
-    background-attachment: fixed;
-}
-#title-bubble {
-    background-color: rgba(0, 0, 0, 0.75);
-    padding: 1rem 1.5rem;
-    border-radius: 20px;
-    margin: 3rem 0 1rem 0;
-    text-align: center;
-    color: white;
-    font-size: 1.4rem;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
-}
-"""
 
-with gr.Blocks(css=custom_css) as demo:
-    with gr.Column():
-        gr.HTML('<div id="title-bubble">How can I help you</div>')
 
-        with gr.Row():
-            pdf_input = gr.File(file_types=[".pdf"], file_count="multiple", label="Upload PDFs")
-            submit_btn = gr.Button("Process PDFs")
+# Step 1: Upload PDFs + wait for submit
+uploaded_files, submitted = upload_pdfs()
 
-        status = gr.Textbox(label="Status", interactive=False)
+# Step 2: If user clicks submit, update vectorstore
+if submitted and uploaded_files:
+    with st.spinner(" Updating vector database..."):
+        vectorstore = load_vectorstore(uploaded_files)
+        st.session_state.vectorstore = vectorstore
 
-        submit_btn.click(fn=process_pdfs, inputs=pdf_input, outputs=status)
 
-        with gr.Accordion("Vectorstore Inspector", open=False):
-            gr.Markdown("Placeholder for vectorstore insights")  # You can hook inspect_chroma here
+# Step 3: Display vectorstore inspector (Sidebar)
+if "vectorstore" in st.session_state:
+    inspect_chroma(st.session_state.vectorstore)
 
-        chatbot = gr.ChatInterface(chatbot_fn)
+# Step 4: Display old chat messages
+display_chat_history()
 
-        with gr.Row():
-            gr.Button("Download Chat History").click(download_history, outputs=[])
+# Step 5: Handle new prompt input
+if "vectorstore" in st.session_state:
+    handle_user_input(get_llm_chain(st.session_state.vectorstore))
 
-demo.launch()
+# Step 6: Chat history export
+download_chat_history()

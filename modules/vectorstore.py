@@ -1,25 +1,11 @@
-import os
-import pickle
-from langchain.vectorstores import FAISS
+from langchain.vectorstores import Chroma
+from langchain.document_loaders import PyPDFLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import PyPDFLoader
+from modules.pdf_handler import save_uploaded_files
+import os
 
-PERSIST_DIR = "./faiss_store"
-
-def save_uploaded_files(uploaded_files):
-    # Create a directory to save files if not already exists
-    if not os.path.exists("uploaded_files"):
-        os.makedirs("uploaded_files")
-    
-    file_paths = []
-    for file in uploaded_files:
-        file_path = os.path.join("uploaded_files", file.name)
-        with open(file_path, "wb") as f:
-            f.write(file.getbuffer())
-        file_paths.append(file_path)
-    
-    return file_paths
+PERSIST_DIR = "./chroma_store"
 
 def load_vectorstore(uploaded_files):
     paths = save_uploaded_files(uploaded_files)
@@ -35,26 +21,17 @@ def load_vectorstore(uploaded_files):
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L12-v2")
 
     if os.path.exists(PERSIST_DIR) and os.listdir(PERSIST_DIR):
-        pickle_path = os.path.join(PERSIST_DIR, "faiss_index.pkl")
-        if os.path.exists(pickle_path):
-            # Load FAISS from pickle file with deserialization flag
-            with open(pickle_path, 'rb') as f:
-                vectorstore = pickle.load(f, allow_dangerous_deserialization=True)
-            vectorstore.add_documents(texts)
-            vectorstore.save_local(PERSIST_DIR)
-        else:
-            # If the file doesn't exist, create a new FAISS vector store
-            vectorstore = FAISS.from_documents(
-                documents=texts,
-                embedding=embeddings
-            )
-            vectorstore.save_local(PERSIST_DIR)
+        # Append to existing
+        vectorstore = Chroma(persist_directory=PERSIST_DIR, embedding_function=embeddings)
+        vectorstore.add_documents(texts)
+        vectorstore.persist()
     else:
-        # Create new FAISS vector store
-        vectorstore = FAISS.from_documents(
+        # Create new
+        vectorstore = Chroma.from_documents(
             documents=texts,
-            embedding=embeddings
+            embedding=embeddings,
+            persist_directory=PERSIST_DIR
         )
-        vectorstore.save_local(PERSIST_DIR)
+        vectorstore.persist()
 
     return vectorstore
