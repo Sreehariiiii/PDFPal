@@ -1,11 +1,12 @@
-import streamlit as st
+import gradio as gr
 import tempfile
 
 def upload_pdfs():
-    with st.sidebar:
-        st.header("📁 Upload PDFs")
-        uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
-        submit = st.button(" Submit to DB")
+    with gr.Column():
+        gr.Markdown("📁 Upload PDFs")
+        uploaded_files = gr.File(file_types=["pdf"], file_count="multiple", label="Choose PDF files")
+        submit = gr.Button("Submit to DB")
+    
     return uploaded_files, submit
 
 def save_uploaded_files(uploaded_files):

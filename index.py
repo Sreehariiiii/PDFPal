@@ -1,6 +1,6 @@
+import gradio as gr
 import warnings
 import logging
-import streamlit as st
 
 # Local modules
 from modules.chat import display_chat_history, handle_user_input, download_chat_history
@@ -13,68 +13,65 @@ from modules.chroma_inspector import inspect_chroma
 warnings.filterwarnings("ignore")
 logging.getLogger("transformers").setLevel(logging.ERROR)
 
-st.set_page_config(
-    page_title="RagBot!")
+# App state
+chat_history = []
+vectorstore = None
 
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-image: url("https://t3.ftcdn.net/jpg/05/77/43/10/360_F_577431075_kUXMnnnKgCcvvPVmn66g4yP7mWnsVJRs.jpg");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
+def process_pdfs(files):
+    global vectorstore
+    if files:
+        vectorstore = load_vectorstore(files)
+        return "PDFs processed and vectorstore updated."
+    return "No files uploaded."
 
-    .custom-bubble {
-        background-color: rgba(0, 0, 0, 0.75);
-        padding: 1rem 1.5rem;
-        border-radius: 20px;
-        margin: 3rem 0 1rem 0;
-        display: flex;
-        justify-content: center;   /* center text horizontally */
-        align-items: center;       /* center text vertically */
-        width: fit-content;
-        height: 60px;              /* fixed height for vertical alignment */
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
-    }
+def chatbot_fn(message, history):
+    if vectorstore:
+        chain = get_llm_chain(vectorstore)
+        response = handle_user_input(chain, message, history)
+        return response
+    else:
+        return "Please upload and process PDFs first."
 
-    .custom-bubble h1 {
-        color: white;
-        font-size: 1.4rem;
-        margin: 0;
-        text-align: center;
-        white-space: nowrap;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+def download_history():
+    return download_chat_history(chat_history)
 
-# Use this for your custom title
-st.markdown('<div class="custom-bubble"><h1>How can I help you</h1></div>', unsafe_allow_html=True)
+# Custom CSS for background and chat bubble
+custom_css = """
+body {
+    background-image: url('https://t3.ftcdn.net/jpg/05/77/43/10/360_F_577431075_kUXMnnnKgCcvvPVmn66g4yP7mWnsVJRs.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+}
+#title-bubble {
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 1rem 1.5rem;
+    border-radius: 20px;
+    margin: 3rem 0 1rem 0;
+    text-align: center;
+    color: white;
+    font-size: 1.4rem;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+}
+"""
 
-# Step 1: Upload PDFs + wait for submit
-uploaded_files, submitted = upload_pdfs()
+with gr.Blocks(css=custom_css) as demo:
+    with gr.Column():
+        gr.HTML('<div id="title-bubble">How can I help you</div>')
 
-# Step 2: If user clicks submit, update vectorstore
-if submitted and uploaded_files:
-    with st.spinner(" Updating vector database..."):
-        # Ensure the load_vectorstore function is updated for FAISS
-        vectorstore = load_vectorstore(uploaded_files)  # Ensure this is set up for FAISS
-        st.session_state.vectorstore = vectorstore
+        with gr.Row():
+            pdf_input = gr.File(file_types=[".pdf"], file_count="multiple", label="Upload PDFs")
+            submit_btn = gr.Button("Process PDFs")
 
-# Step 3: Display vectorstore inspector (Sidebar)
-if "vectorstore" in st.session_state:
-    inspect_chroma(st.session_state.vectorstore)
+        status = gr.Textbox(label="Status", interactive=False)
 
-# Step 4: Display old chat messages
-display_chat_history()
+        submit_btn.click(fn=process_pdfs, inputs=pdf_input, outputs=status)
 
-# Step 5: Handle new prompt input
-if "vectorstore" in st.session_state:
-    handle_user_input(get_llm_chain(st.session_state.vectorstore))
+        with gr.Accordion("Vectorstore Inspector", open=False):
+            gr.Markdown("Placeholder for vectorstore insights")  # You can hook inspect_chroma here
 
-# Step 6: Chat history export
-download_chat_history()
+        chatbot = gr.ChatInterface(chatbot_fn)
+
+        with gr.Row():
+            gr.Button("Download Chat History").click(download_history, outputs=[])
+
+demo.launch()

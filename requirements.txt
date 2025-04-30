@@ -1,7 +1,7 @@
 setuptools==68.2.2
 wheel
 numpy==1.26.4
-streamlit==1.36.0
+gradio==3.19.1  # Add Gradio package
 langchain-groq==0.1.0
 langchain-community==0.0.30
 pypdf==3.16.4
