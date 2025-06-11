@@ -1,4 +1,4 @@
-**RAGBOT--2: Modular PDF Retrieval-Augmented Generation Chatbot**
+**PDFPal: Modular PDF Retrieval-Augmented Generation Chatbot**
 =================================================================
 
 A modular Retrieval-Augmented Generation (RAG) chatbot designed for seamless interaction with your PDF documents. Built using Streamlit, Chroma vector store, and the GROQ LLM, this bot enables efficient retrieval and synthesis of information from uploaded PDFs, all within a user-friendly web interface.
@@ -22,19 +22,17 @@ A modular Retrieval-Augmented Generation (RAG) chatbot designed for seamless int
 ```
 groq_rag_chatbot/
 │
-├── index.py # Main Streamlit app
-├── requirements.txt # Python dependencies
+├── index.py 
+├── requirements.txt
 │
-├── moduless/ # All modular logic
-│ ├── pdf_handler.py # PDF upload + loading logic
-│ ├── vectorstore.py # Chroma in-memory vector store setup
-│ ├── llm.py # GROQ LLM and RetrievalQA chain
-│ ├── chat.py # Chat interaction logic (input/output)
-│ └── chroma_inspector.py # View vector store chunks from sidebar
+├── moduless/ 
+│ ├── pdf_handler.py 
+│ ├── vectorstore.py 
+│ ├── llm.py 
+│ ├── chat.py 
+│ └── chroma_inspector.py 
 
 
-
----
 ```
 **GETTING STARTED**
 -------------------
