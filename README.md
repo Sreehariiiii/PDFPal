@@ -19,7 +19,7 @@ A modular Retrieval-Augmented Generation (RAG) chatbot designed for seamless int
 
 **PROJECT STRUCTURE**
 ---------------------
-
+```
 groq_rag_chatbot/
 │
 ├── index.py # Main Streamlit app
@@ -32,10 +32,10 @@ groq_rag_chatbot/
 │ ├── chat.py # Chat interaction logic (input/output)
 │ └── chroma_inspector.py # View vector store chunks from sidebar
 
-text
+
 
 ---
-
+```
 **GETTING STARTED**
 -------------------
 
